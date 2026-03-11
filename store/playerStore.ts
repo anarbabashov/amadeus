@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { audioService } from '@/services/audioService';
 import type { StreamStatus, StreamQuality, TrackMetadata } from '@/types/player';
 
 const VOLUME_STORAGE_KEY = '@bonnytone/volume';
@@ -67,13 +68,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   errorCount: 0,
   lastError: null,
 
-  // Playback actions (audio service integration added in Phase 2)
+  // Playback actions
   play: () => {
     set({ streamStatus: 'connecting', lastError: null });
+    audioService.play();
   },
 
   pause: () => {
-    set({ isPlaying: false, isBuffering: false, streamStatus: 'idle' });
+    audioService.pause();
   },
 
   togglePlayPause: () => {
@@ -88,6 +90,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   setVolume: (volume: number) => {
     const clamped = Math.min(1, Math.max(0, volume));
     set({ volume: clamped, isMuted: clamped === 0 });
+    audioService.setVolume(clamped);
     AsyncStorage.setItem(VOLUME_STORAGE_KEY, String(clamped)).catch(() => {});
   },
 
@@ -95,8 +98,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     const { isMuted, volume, previousVolume } = get();
     if (isMuted) {
       set({ isMuted: false, volume: previousVolume });
+      audioService.setVolume(previousVolume);
     } else {
       set({ isMuted: true, previousVolume: volume, volume: 0 });
+      audioService.setVolume(0);
     }
   },
 
