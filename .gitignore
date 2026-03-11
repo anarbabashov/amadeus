@@ -44,5 +44,10 @@ coverage/
 *.p12
 google-service-account.json
 
+# Documentation & markdown (except README)
+*.md
+!README.md
+docs/
+
 # Claude Code
 .claude/
