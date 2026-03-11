@@ -1,139 +1,48 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-# Main
-.env
-
-# Personal/sensitive docs
-docs/partnership-letter.md
-.mailbox/
-
-# Documentation & markdown files (except README)
-docs/
-*.md
-!README.md
-
-# Claude Code
-.claude/
-
 # dependencies
-/node_modules
-/.pnp
-.pnp.js
+node_modules/
 
-# testing
-/coverage
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
 
-# next.js
-/.next/
-/out/
+# Native build directories
+ios/
+android/
 
-# production
-/build
+# Environment
+.env
+.env.*
 
-# misc
-.DS_Store
-*.pem
-*eml
-
-# debug
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
 
-# local env files
-.env*.local
-.env
-.env.production
-.env.staging
-.env.development
+# macOS
+.DS_Store
 
-# vercel
-.vercel
+# IDE
+.vscode/
+.idea/
 
-# typescript
+# TypeScript
 *.tsbuildinfo
-next-env.d.ts
 
-# Security & Auth sensitive files
-/tmp/emails/          # Email dev transport files (may contain tokens)
-/logs/                # Application logs (may contain sensitive data)
-/uploads/             # User uploaded files
-/backups/             # Database backups
-/keys/                # Private keys and certificates
-*.pem                 # SSL certificates and private keys
-*.key                 # Private keys
-*.cert                # Certificates
-*.crt                 # Certificates
-*.p12                 # Certificate bundles
-*.pfx                 # Certificate bundles
-id_rsa*               # SSH keys
-*.ppk                 # Putty private keys
+# Testing
+coverage/
 
-# Database files & exports
-*.db                  # SQLite databases
-*.sqlite              # SQLite databases
-*.sqlite3             # SQLite databases
-/data/                # Local data directory
-/database/            # Database files
-*.sql                 # SQL dumps (may contain sensitive data)
-*.dump                # Database dumps
-*.backup              # Database backups
-migrations/data/      # Migration data files
+# Build
+/build
 
-# JWT & Crypto secrets
-jwt_private.key       # JWT private keys
-jwt_public.key        # JWT public keys  
-/secrets/             # Secrets directory
-*.secret              # Secret files
+# Secrets
+*.pem
+*.key
+*.cert
+*.p12
+google-service-account.json
 
-# Session & cache files
-/sessions/            # Session storage
-/cache/               # Cache directory
-redis.conf            # Redis configuration
-*.session             # Session files
-
-# Testing artifacts with sensitive data
-/test-data/           # Test data that may contain real emails/users
-/fixtures/            # Test fixtures with sensitive data
-/test-uploads/        # Test file uploads
-__tests__/temp/       # Temporary test files
-coverage/lcov-report/ # Detailed coverage reports
-
-# Security scan results
-/security-reports/    # Security scanning results
-vulnerability-report* # Security vulnerability reports
-audit-*.json          # Security audit results
-
-# Monitoring & observability
-/monitoring/          # Local monitoring data
-metrics.log           # Metrics logs
-audit.log             # Audit logs
-access.log            # Access logs
-error.log             # Error logs
-*.log                 # All log files
-
-# Docker secrets & configs
-docker-compose.override.yml  # Local docker overrides
-.dockerignore.local          # Local docker ignore
-secrets.yml                  # Docker secrets
-configs.yml                  # Docker configs
-
-# IDE & Editor files with potentially sensitive paths
-.vscode/settings.json        # VS Code settings (may contain paths)
-.idea/                       # IntelliJ IDEA settings
-*.swp                        # Vim swap files
-*.swo                        # Vim swap files
-*~                          # Backup files
-
-# OS generated files
-Thumbs.db               # Windows thumbnails
-ehthumbs.db            # Windows thumbnails
-Desktop.ini            # Windows desktop config
-.DS_Store              # macOS directory metadata
-.AppleDouble           # macOS resource forks
-.LSOverride            # macOS Launch Services
-
-# Temporary files that may contain sensitive data
-/tmp/                  # Temporary directory
-*.tmp                  # Temporary files  
-*.temp                 # Temporary files
-temp/                  # Temporary directory
+# Claude Code
+.claude/
