@@ -1,0 +1,40 @@
+import { useEffect, useRef } from 'react';
+import { usePlayerStore } from '@/store/playerStore';
+import { audioService } from '@/services/audioService';
+
+export function usePlayer() {
+  const initialized = useRef(false);
+
+  const isPlaying = usePlayerStore((s) => s.isPlaying);
+  const isBuffering = usePlayerStore((s) => s.isBuffering);
+  const volume = usePlayerStore((s) => s.volume);
+  const isMuted = usePlayerStore((s) => s.isMuted);
+  const streamStatus = usePlayerStore((s) => s.streamStatus);
+  const togglePlayPause = usePlayerStore((s) => s.togglePlayPause);
+  const setVolume = usePlayerStore((s) => s.setVolume);
+  const toggleMute = usePlayerStore((s) => s.toggleMute);
+
+  useEffect(() => {
+    if (!initialized.current) {
+      initialized.current = true;
+      audioService.initialize();
+      usePlayerStore.getState().hydrateVolume();
+    }
+
+    return () => {
+      // Cleanup on unmount (app termination)
+      audioService.destroy();
+    };
+  }, []);
+
+  return {
+    isPlaying,
+    isBuffering,
+    volume,
+    isMuted,
+    streamStatus,
+    togglePlayPause,
+    setVolume,
+    toggleMute,
+  };
+}
