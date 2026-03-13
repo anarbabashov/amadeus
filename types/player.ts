@@ -7,5 +7,3 @@ export interface TrackMetadata {
   artist: string;
   artworkUrl: string | null;
 }
-
-export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected' | 'error';

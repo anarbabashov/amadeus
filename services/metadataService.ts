@@ -24,10 +24,11 @@ let isPolling = false;
 
 async function fetchNowPlaying(): Promise<void> {
   const store = usePlayerStore.getState();
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), CONFIG.METADATA_TIMEOUT_MS);
+    timeoutId = setTimeout(() => controller.abort(), CONFIG.METADATA_TIMEOUT_MS);
 
     const response = await fetch(CONFIG.METADATA_API_URL, {
       signal: controller.signal,
@@ -35,6 +36,7 @@ async function fetchNowPlaying(): Promise<void> {
     });
 
     clearTimeout(timeoutId);
+    timeoutId = null;
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -52,6 +54,9 @@ async function fetchNowPlaying(): Promise<void> {
     store.setListenerCount(data.listeners.current);
     store.setIsLive(data.live.is_live);
   } catch (error) {
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId);
+    }
     console.warn('[Metadata] Failed to fetch now-playing data:', error);
     // Keep last known metadata — stale data is better than no data
     if (store.nowPlaying === null) {

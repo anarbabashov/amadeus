@@ -4,6 +4,7 @@ import { audioService } from '@/services/audioService';
 
 export function usePlayer() {
   const initialized = useRef(false);
+  const destroyed = useRef(false);
 
   const isPlaying = usePlayerStore((s) => s.isPlaying);
   const isBuffering = usePlayerStore((s) => s.isBuffering);
@@ -17,13 +18,17 @@ export function usePlayer() {
   useEffect(() => {
     if (!initialized.current) {
       initialized.current = true;
+      destroyed.current = false;
       audioService.initialize();
       usePlayerStore.getState().hydrateVolume();
     }
 
     return () => {
-      // Cleanup on unmount (app termination)
-      audioService.destroy();
+      if (!destroyed.current) {
+        destroyed.current = true;
+        initialized.current = false;
+        audioService.destroy();
+      }
     };
   }, []);
 
