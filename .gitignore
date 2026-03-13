@@ -49,5 +49,8 @@ google-service-account.json
 !README.md
 docs/
 
+# Ruby version (rbenv local)
+.ruby-version
+
 # Claude Code
 .claude/

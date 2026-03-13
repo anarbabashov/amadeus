@@ -1,0 +1,42 @@
+diff --git a/node_modules/expo-image/ios/ExpoImage.podspec b/node_modules/expo-image/ios/ExpoImage.podspec
+index 4f2f3cf..ebc6c1a 100644
+--- a/node_modules/expo-image/ios/ExpoImage.podspec
++++ b/node_modules/expo-image/ios/ExpoImage.podspec
+@@ -23,7 +23,7 @@ Pod::Spec.new do |s|
+     :ios => '15.1',
+     :tvos => '15.1'
+   }
+-  s.swift_version  = '6.0'
++  s.swift_version  = '5.0'
+   s.source         = { git: 'https://github.com/expo/expo.git' }
+   s.static_framework = true
+ 
+diff --git a/node_modules/expo-image/ios/ImageView.swift b/node_modules/expo-image/ios/ImageView.swift
+index adcf377..8e30032 100644
+--- a/node_modules/expo-image/ios/ImageView.swift
++++ b/node_modules/expo-image/ios/ImageView.swift
+@@ -664,22 +664,8 @@ public final class ImageView: ExpoView {
+ 
+   @available(iOS 26.0, tvOS 26.0, *)
+   private func applySymbolEffectiOS26(effect: SFSymbolEffectType, scope: SFSymbolEffectScope?, options: SymbolEffectOptions) {
+-    switch effect {
+-    case .drawOn:
+-      switch scope {
+-      case .byLayer: sdImageView.addSymbolEffect(.drawOn.byLayer, options: options)
+-      case .wholeSymbol: sdImageView.addSymbolEffect(.drawOn.wholeSymbol, options: options)
+-      case .none: sdImageView.addSymbolEffect(.drawOn, options: options)
+-      }
+-    case .drawOff:
+-      switch scope {
+-      case .byLayer: sdImageView.addSymbolEffect(.drawOff.byLayer, options: options)
+-      case .wholeSymbol: sdImageView.addSymbolEffect(.drawOff.wholeSymbol, options: options)
+-      case .none: sdImageView.addSymbolEffect(.drawOff, options: options)
+-      }
+-    default:
+-      break
+-    }
++    // iOS 26 symbol effects disabled for Xcode 16 compatibility
++    // drawOn/drawOff symbols require iOS 26 SDK
+   }
+ 
+   func startSymbolAnimation() {
