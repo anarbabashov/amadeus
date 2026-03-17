@@ -4,11 +4,11 @@
     "slug": "bonnytone-radio",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icons/ios-icon-1024.png",
     "scheme": "bonnytone",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/icons/icon-master-1024.png",
       "resizeMode": "contain",
       "backgroundColor": "#0a0a0a"
     },
@@ -30,15 +30,13 @@
       ],
       "adaptiveIcon": {
         "backgroundColor": "#0a0a0a",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/icons/android-512.png"
       }
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/icons/favicon-32.png"
     },
     "plugins": [
       "expo-router",
