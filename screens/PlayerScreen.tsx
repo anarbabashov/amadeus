@@ -6,7 +6,6 @@ import { usePlayerStore } from '@/store/playerStore';
 import PlayerBackground from '@/components/PlayerBackground';
 import Header from '@/components/Header';
 import NowPlaying from '@/components/NowPlaying';
-import PlayButton from '@/components/PlayButton';
 import VolumeControl from '@/components/VolumeControl';
 import StreamStatus from '@/components/StreamStatus';
 import ActionBar from '@/components/ActionBar';
@@ -37,22 +36,17 @@ export default function PlayerScreen() {
 
       <View style={styles.content}>
         <StreamStatus
-          isLive={isLive}
-          listenerCount={listenerCount}
           streamStatus={streamStatus}
           errorCount={errorCount}
-        />
-
-        <NowPlaying
-          artworkUrl={artworkUrl}
           title={title}
           artist={artist}
         />
 
-        <PlayButton
+        <NowPlaying
+          artworkUrl={artworkUrl}
           isPlaying={isPlaying}
           isBuffering={isBuffering || streamStatus === 'connecting'}
-          onPress={togglePlayPause}
+          onPlayPress={togglePlayPause}
         />
 
         {streamStatus === 'offline' && (
@@ -61,17 +55,17 @@ export default function PlayerScreen() {
           </Pressable>
         )}
 
+        <ActionBar isMuted={isMuted} onMuteToggle={toggleMute} />
+
         <VolumeControl
           volume={volume}
           isMuted={isMuted}
           onVolumeChange={setVolume}
           onMuteToggle={toggleMute}
         />
-
-        <ActionBar />
       </View>
 
-      <View style={{ height: insets.bottom + spacing.md }} />
+      <View style={{ height: insets.bottom + spacing.sm }} />
     </View>
   );
 }
