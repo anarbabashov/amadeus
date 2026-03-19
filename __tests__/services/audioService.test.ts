@@ -49,7 +49,7 @@ describe('audioService', () => {
         expect.objectContaining({
           staysActiveInBackground: true,
           playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
+          shouldDuckAndroid: false,
         })
       );
     });
@@ -93,13 +93,14 @@ describe('audioService', () => {
   });
 
   describe('pause()', () => {
-    it('sets isPlaying to false and status to idle', async () => {
+    it('sets isPlaying to false but keeps stream status', async () => {
       await audioService.initialize();
       await audioService.play();
       await audioService.pause();
 
       expect(usePlayerStore.getState().isPlaying).toBe(false);
-      expect(usePlayerStore.getState().streamStatus).toBe('idle');
+      // Stream status stays as-is (connecting/live) — it reflects stream state, not play/pause
+      expect(usePlayerStore.getState().streamStatus).toBe('connecting');
     });
 
     it('calls pauseAsync on the sound instance', async () => {
