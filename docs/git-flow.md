@@ -68,6 +68,7 @@ release/v1.0.0
 3. **Stage only related files.** Use `git add <file>` for specific files, not `git add .` blindly.
 4. **Never commit secrets.** No `.env` files, API keys, or credentials.
 5. **Write meaningful descriptions.** The message should explain *what* was done, not *how*.
+6. **No Co-Authored-By trailers.** Do not add `Co-Authored-By` lines to commit messages.
 
 ### Good vs Bad Commits
 
