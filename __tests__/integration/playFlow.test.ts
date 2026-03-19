@@ -71,9 +71,10 @@ describe('Play Flow Integration', () => {
     statusCallback!({ isLoaded: true, isPlaying: true, isBuffering: false });
     expect(usePlayerStore.getState().streamStatus).toBe('live');
 
-    // HLS micro-buffer: isBuffering=true is ignored (early return), state unchanged
+    // Enter buffering
     statusCallback!({ isLoaded: true, isPlaying: false, isBuffering: true });
-    expect(usePlayerStore.getState().streamStatus).toBe('live');
+    expect(usePlayerStore.getState().isBuffering).toBe(true);
+    expect(usePlayerStore.getState().streamStatus).toBe('buffering');
 
     // Exit buffering
     statusCallback!({ isLoaded: true, isPlaying: true, isBuffering: false });
@@ -105,7 +106,7 @@ describe('Play Flow Integration', () => {
     expect(usePlayerStore.getState().streamStatus).toBe('live');
   });
 
-  it('pause cancels reconnect timers but keeps stream status', async () => {
+  it('pause cancels reconnect timers and resets to idle', async () => {
     await audioService.initialize();
     await audioService.play();
 
@@ -115,8 +116,7 @@ describe('Play Flow Integration', () => {
     await audioService.pause();
 
     expect(usePlayerStore.getState().isPlaying).toBe(false);
-    // Stream status stays 'live' — reflects stream state, not play/pause
-    expect(usePlayerStore.getState().streamStatus).toBe('live');
+    expect(usePlayerStore.getState().streamStatus).toBe('idle');
     expect(mockSound.pauseAsync).toHaveBeenCalled();
   });
 

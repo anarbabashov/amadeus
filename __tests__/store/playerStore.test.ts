@@ -6,9 +6,9 @@ beforeEach(() => {
   usePlayerStore.setState({
     isPlaying: false,
     isBuffering: false,
-    volume: 1.0,
+    volume: 0.8,
     isMuted: false,
-    previousVolume: 1.0,
+    previousVolume: 0.8,
     streamQuality: 'medium',
     streamStatus: 'idle',
     nowPlaying: null,
@@ -104,7 +104,7 @@ describe('playerStore', () => {
       usePlayerStore.setState({ volume: 0, isMuted: true, previousVolume: 0 });
       usePlayerStore.getState().toggleMute();
       expect(usePlayerStore.getState().isMuted).toBe(false);
-      expect(usePlayerStore.getState().volume).toBe(1.0);
+      expect(usePlayerStore.getState().volume).toBe(0.8);
     });
 
     it('does not save zero as previousVolume when muting at zero', () => {
@@ -197,13 +197,13 @@ describe('playerStore', () => {
     it('keeps default volume when no stored value', async () => {
       (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(null);
       await usePlayerStore.getState().hydrateVolume();
-      expect(usePlayerStore.getState().volume).toBe(1.0);
+      expect(usePlayerStore.getState().volume).toBe(0.8);
     });
 
     it('ignores invalid stored values', async () => {
       (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('invalid');
       await usePlayerStore.getState().hydrateVolume();
-      expect(usePlayerStore.getState().volume).toBe(1.0);
+      expect(usePlayerStore.getState().volume).toBe(0.8);
     });
   });
 });

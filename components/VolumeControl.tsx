@@ -18,11 +18,14 @@ export default function VolumeControl({
 }: VolumeControlProps) {
   const displayVolume = isMuted ? 0 : volume;
 
-  const leftIcon = isMuted || volume === 0
+  const iconName = isMuted || volume === 0
     ? 'volume-mute'
-    : 'volume-low';
+    : volume < 0.5
+      ? 'volume-low'
+      : 'volume-high';
 
   const handleVolumeChange = (value: number) => {
+    // When user drags slider while muted, unmute automatically
     if (isMuted && value > 0) {
       onMuteToggle();
     }
@@ -32,7 +35,7 @@ export default function VolumeControl({
   return (
     <View style={styles.container}>
       <Pressable onPress={onMuteToggle} hitSlop={8} style={styles.iconButton}>
-        <Ionicons name={leftIcon} size={22} color={colors.textSecondary} />
+        <Ionicons name={iconName} size={22} color={colors.textSecondary} />
       </Pressable>
       <Slider
         style={styles.slider}
@@ -45,9 +48,6 @@ export default function VolumeControl({
         maximumTrackTintColor={colors.glassBorder}
         thumbTintColor={colors.text}
       />
-      <View style={styles.iconButton}>
-        <Ionicons name="volume-high" size={22} color={colors.textSecondary} />
-      </View>
     </View>
   );
 }

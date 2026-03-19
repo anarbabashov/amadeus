@@ -56,11 +56,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   // Initial state
   isPlaying: false,
   isBuffering: false,
-  volume: 1.0,
+  volume: 0.8,
   isMuted: false,
-  previousVolume: 1.0,
+  previousVolume: 0.8,
   streamQuality: 'medium',
-  streamStatus: 'live',
+  streamStatus: 'idle',
   nowPlaying: null,
   isLive: false,
   listenerCount: null,
@@ -68,15 +68,13 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   errorCount: 0,
   lastError: null,
 
-  // Playback actions — set isPlaying optimistically so the UI updates
-  // immediately on tap, without waiting for async audio callbacks
+  // Playback actions
   play: () => {
-    set({ isPlaying: true, streamStatus: 'connecting', lastError: null });
+    set({ streamStatus: 'connecting', lastError: null });
     audioService.play();
   },
 
   pause: () => {
-    set({ isPlaying: false });
     audioService.pause();
   },
 
@@ -102,7 +100,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     const { isMuted, volume, previousVolume } = get();
     if (isMuted) {
       // Restore previous volume, but ensure it's audible
-      const restoreVolume = previousVolume > 0 ? previousVolume : 1.0;
+      const restoreVolume = previousVolume > 0 ? previousVolume : 0.8;
       set({ isMuted: false, volume: restoreVolume });
       audioService.setVolume(restoreVolume);
     } else {

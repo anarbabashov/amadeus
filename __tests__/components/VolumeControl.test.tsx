@@ -24,22 +24,21 @@ jest.mock('@react-native-community/slider', () => {
 });
 
 describe('VolumeControl', () => {
-  it('shows volume-low icon on left at high volume', () => {
-    const { getAllByTestId } = render(
+  it('shows volume-high icon at high volume', () => {
+    const { getByTestId } = render(
       <VolumeControl volume={0.8} isMuted={false} onVolumeChange={jest.fn()} onMuteToggle={jest.fn()} />
     );
-    // Left icon is volume-low (decorative), right icon is volume-high
-    expect(getAllByTestId('icon-volume-low').length).toBeGreaterThanOrEqual(1);
+    expect(getByTestId('icon-volume-high')).toBeTruthy();
   });
 
-  it('shows volume-high icon on right side', () => {
-    const { getAllByTestId } = render(
-      <VolumeControl volume={0.8} isMuted={false} onVolumeChange={jest.fn()} onMuteToggle={jest.fn()} />
+  it('shows volume-low icon at low volume', () => {
+    const { getByTestId } = render(
+      <VolumeControl volume={0.3} isMuted={false} onVolumeChange={jest.fn()} onMuteToggle={jest.fn()} />
     );
-    expect(getAllByTestId('icon-volume-high').length).toBeGreaterThanOrEqual(1);
+    expect(getByTestId('icon-volume-low')).toBeTruthy();
   });
 
-  it('shows volume-mute icon on left when muted', () => {
+  it('shows volume-mute icon when muted', () => {
     const { getByTestId } = render(
       <VolumeControl volume={0.8} isMuted={true} onVolumeChange={jest.fn()} onMuteToggle={jest.fn()} />
     );
@@ -53,12 +52,12 @@ describe('VolumeControl', () => {
     expect(getByTestId('icon-volume-mute')).toBeTruthy();
   });
 
-  it('calls onMuteToggle when left icon pressed', () => {
+  it('calls onMuteToggle when mute button pressed', () => {
     const onMuteToggle = jest.fn();
-    const { getAllByTestId } = render(
+    const { getByTestId } = render(
       <VolumeControl volume={0.8} isMuted={false} onVolumeChange={jest.fn()} onMuteToggle={onMuteToggle} />
     );
-    fireEvent.press(getAllByTestId('icon-volume-low')[0]);
+    fireEvent.press(getByTestId('icon-volume-high'));
     expect(onMuteToggle).toHaveBeenCalledTimes(1);
   });
 

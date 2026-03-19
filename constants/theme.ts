@@ -8,8 +8,7 @@ export const colors = {
   text: '#ffffff',
   textSecondary: 'rgba(255, 255, 255, 0.6)',
   textTertiary: 'rgba(255, 255, 255, 0.4)',
-  liveBadge: '#22c55e',
-  liveBadgeBg: 'rgba(34, 197, 94, 0.15)',
+  liveBadge: '#ef4444',
 } as const;
 
 export const glass = {
@@ -55,7 +54,6 @@ export const sizes = {
   playButton: 80,
   playButtonIcon: 32,
   artwork: 240,
-  artworkRadius: 120,
+  artworkRadius: 16,
   actionButton: 44,
-  actionButtonCircle: 48,
 } as const;

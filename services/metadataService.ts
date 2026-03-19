@@ -53,11 +53,6 @@ async function fetchNowPlaying(): Promise<void> {
 
     store.setListenerCount(data.listeners.current);
     store.setIsLive(data.live.is_live);
-
-    // If stream is live and we haven't started playing yet, show LIVE badge
-    if (data.live.is_live && store.streamStatus === 'idle') {
-      store.setStreamStatus('live');
-    }
   } catch (error) {
     if (timeoutId !== null) {
       clearTimeout(timeoutId);
