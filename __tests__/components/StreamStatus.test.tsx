@@ -3,80 +3,74 @@ import { render } from '@testing-library/react-native';
 import StreamStatus from '@/components/StreamStatus';
 
 jest.mock('react-native-reanimated', () => {
-  const { View } = require('react-native');
+  const { View, Text } = require('react-native');
   return {
     __esModule: true,
     default: {
       View,
+      Text,
       createAnimatedComponent: (comp: any) => comp,
     },
     useSharedValue: (val: number) => ({ value: val }),
     useAnimatedStyle: (fn: () => any) => fn(),
     withRepeat: jest.fn(),
     withTiming: jest.fn((val: number) => val),
+    withSequence: jest.fn((...args: any[]) => args[args.length - 1]),
     Easing: {
       inOut: jest.fn(() => jest.fn()),
+      out: jest.fn(() => jest.fn()),
       ease: 'ease',
     },
   };
 });
 
+jest.mock('expo-blur', () => {
+  const { View } = require('react-native');
+  return {
+    BlurView: (props: any) => <View testID="blur-view" {...props} />,
+  };
+});
+
 describe('StreamStatus', () => {
-  it('shows LIVE badge when live and status is live', () => {
+  it('shows LIVE text when stream is live', () => {
     const { getByText } = render(
-      <StreamStatus isLive={true} listenerCount={42} streamStatus="live" />
+      <StreamStatus streamStatus="live" />
     );
     expect(getByText('LIVE')).toBeTruthy();
   });
 
-  it('shows listener count when live', () => {
-    const { getByText } = render(
-      <StreamStatus isLive={true} listenerCount={42} streamStatus="live" />
-    );
-    expect(getByText('42 listening')).toBeTruthy();
-  });
-
-  it('hides LIVE badge when not live', () => {
+  it('returns null when idle', () => {
     const { queryByText } = render(
-      <StreamStatus isLive={false} listenerCount={42} streamStatus="live" />
+      <StreamStatus streamStatus="idle" />
     );
     expect(queryByText('LIVE')).toBeNull();
   });
 
-  it('shows Connecting text', () => {
+  it('shows CONNECTING when connecting', () => {
     const { getByText } = render(
-      <StreamStatus isLive={false} listenerCount={null} streamStatus="connecting" />
+      <StreamStatus streamStatus="connecting" />
     );
-    expect(getByText('Connecting...')).toBeTruthy();
+    expect(getByText('CONNECTING')).toBeTruthy();
   });
 
-  it('shows Buffering text', () => {
+  it('shows OFFLINE when offline', () => {
     const { getByText } = render(
-      <StreamStatus isLive={false} listenerCount={null} streamStatus="buffering" />
+      <StreamStatus streamStatus="offline" />
     );
-    expect(getByText('Buffering...')).toBeTruthy();
+    expect(getByText('OFFLINE')).toBeTruthy();
   });
 
-  it('shows reconnecting with error count', () => {
+  it('shows ERROR when error', () => {
     const { getByText } = render(
-      <StreamStatus isLive={false} listenerCount={null} streamStatus="error" errorCount={3} />
+      <StreamStatus streamStatus="error" errorCount={3} />
     );
-    expect(getByText('Reconnecting (3/10)...')).toBeTruthy();
+    expect(getByText('ERROR')).toBeTruthy();
   });
 
-  it('shows Offline text', () => {
-    const { getByText } = render(
-      <StreamStatus isLive={false} listenerCount={null} streamStatus="offline" />
+  it('has glass blur background', () => {
+    const { getByTestId } = render(
+      <StreamStatus streamStatus="live" />
     );
-    expect(getByText('Offline')).toBeTruthy();
-  });
-
-  it('shows nothing in idle state', () => {
-    const { queryByText } = render(
-      <StreamStatus isLive={false} listenerCount={null} streamStatus="idle" />
-    );
-    expect(queryByText('LIVE')).toBeNull();
-    expect(queryByText('Connecting...')).toBeNull();
-    expect(queryByText('Offline')).toBeNull();
+    expect(getByTestId('blur-view')).toBeTruthy();
   });
 });
