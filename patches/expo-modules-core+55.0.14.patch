@@ -1,0 +1,122 @@
+diff --git a/node_modules/expo-modules-core/ExpoModulesCore.podspec b/node_modules/expo-modules-core/ExpoModulesCore.podspec
+index cfd417b..a0922d6 100644
+--- a/node_modules/expo-modules-core/ExpoModulesCore.podspec
++++ b/node_modules/expo-modules-core/ExpoModulesCore.podspec
+@@ -83,7 +83,7 @@ Pod::Spec.new do |s|
+     :osx => '11.0',
+     :tvos => '15.1'
+   }
+-  s.swift_version  = '6.0'
++  s.swift_version  = '5.0'
+   s.source         = { git: 'https://github.com/expo/expo.git' }
+   s.static_framework = true
+   s.header_dir     = 'ExpoModulesCore'
+diff --git a/node_modules/expo-modules-core/ExpoModulesJSI.podspec b/node_modules/expo-modules-core/ExpoModulesJSI.podspec
+index 73d5f13..376c707 100644
+--- a/node_modules/expo-modules-core/ExpoModulesJSI.podspec
++++ b/node_modules/expo-modules-core/ExpoModulesJSI.podspec
+@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
+     :osx => '11.0',
+     :tvos => '15.1'
+   }
+-  s.swift_version  = '6.0'
++  s.swift_version  = '5.0'
+   s.source         = { git: 'https://github.com/expo/expo.git' }
+   s.static_framework = true
+   s.header_dir     = 'ExpoModulesJSI'
+diff --git a/node_modules/expo-modules-core/ios/Core/Views/SwiftUI/SwiftUIHostingView.swift b/node_modules/expo-modules-core/ios/Core/Views/SwiftUI/SwiftUIHostingView.swift
+index b58d7c0..8d599ca 100644
+--- a/node_modules/expo-modules-core/ios/Core/Views/SwiftUI/SwiftUIHostingView.swift
++++ b/node_modules/expo-modules-core/ios/Core/Views/SwiftUI/SwiftUIHostingView.swift
+@@ -42,7 +42,7 @@ extension ExpoSwiftUI {
+   /**
+    A hosting view that renders a SwiftUI view inside the UIKit view hierarchy.
+    */
+-  public final class HostingView<Props: ViewProps, ContentView: View<Props>>: ExpoView, @MainActor AnyExpoSwiftUIHostingView {
++  public final class HostingView<Props: ViewProps, ContentView: View<Props>>: ExpoView, AnyExpoSwiftUIHostingView {
+     /**
+      Props object that stores all the props for this particular view.
+      It's an environment object that is observed by the content view.
+diff --git a/node_modules/expo-modules-core/ios/Core/Views/ViewDefinition.swift b/node_modules/expo-modules-core/ios/Core/Views/ViewDefinition.swift
+index 5dc73e3..d641170 100644
+--- a/node_modules/expo-modules-core/ios/Core/Views/ViewDefinition.swift
++++ b/node_modules/expo-modules-core/ios/Core/Views/ViewDefinition.swift
+@@ -118,7 +118,7 @@ extension ConcurrentFunctionDefinition: ViewDefinitionFunctionElement {
+   public typealias ViewType = FirstArgType
+ }
+ 
+-extension UIView: @MainActor AnyArgument {
++extension UIView: AnyArgument {
+   public static func getDynamicType() -> AnyDynamicType {
+     return DynamicViewType(innerType: Self.self)
+   }
+diff --git a/node_modules/expo-modules-core/ios/EXDefines.h b/node_modules/expo-modules-core/ios/EXDefines.h
+index 7412ee7..e9203de 100644
+--- a/node_modules/expo-modules-core/ios/EXDefines.h
++++ b/node_modules/expo-modules-core/ios/EXDefines.h
+@@ -93,3 +93,20 @@ typedef struct EXModuleInfo {
+ typedef void (^EXDirectEventBlock)(NSDictionary *body);
+ typedef void (NS_SWIFT_SENDABLE ^EXPromiseResolveBlock)(id result);
+ typedef void (NS_SWIFT_SENDABLE ^EXPromiseRejectBlock)(NSString *code, NSString *message, NSError *error);
++
++// Legacy utility stubs for expo-av compatibility
++static inline NSError *EXErrorWithMessage(NSString *message) {
++  return [NSError errorWithDomain:@"expo" code:0 userInfo:@{NSLocalizedDescriptionKey: message}];
++}
++
++static inline void EXFatal(NSError *error) {
++  NSLog(@"[Expo Fatal] %@", error.localizedDescription);
++}
++
++#define EXLogInfo(fmt, ...) NSLog(@"[Expo Info] " fmt, ##__VA_ARGS__)
++#define EXLogWarn(fmt, ...) NSLog(@"[Expo Warn] " fmt, ##__VA_ARGS__)
++#define EXLogError(fmt, ...) NSLog(@"[Expo Error] " fmt, ##__VA_ARGS__)
++
++// Legacy unimodules type aliases for expo-av compatibility
++typedef EXPromiseResolveBlock UMPromiseResolveBlock;
++typedef EXPromiseRejectBlock UMPromiseRejectBlock;
+diff --git a/node_modules/expo-modules-core/ios/Legacy/Protocols/EXEventEmitter.h b/node_modules/expo-modules-core/ios/Legacy/Protocols/EXEventEmitter.h
+new file mode 100644
+index 0000000..0ab4ed1
+--- /dev/null
++++ b/node_modules/expo-modules-core/ios/Legacy/Protocols/EXEventEmitter.h
+@@ -0,0 +1,10 @@
++// Stub header for legacy expo-av compatibility
++#import <Foundation/Foundation.h>
++
++@protocol EXEventEmitter <NSObject>
++
++- (void)startObserving;
++- (void)stopObserving;
++- (NSArray<NSString *> *)supportedEvents;
++
++@end
+diff --git a/node_modules/expo-modules-core/ios/Legacy/Protocols/EXEventEmitterService.h b/node_modules/expo-modules-core/ios/Legacy/Protocols/EXEventEmitterService.h
+new file mode 100644
+index 0000000..6172402
+--- /dev/null
++++ b/node_modules/expo-modules-core/ios/Legacy/Protocols/EXEventEmitterService.h
+@@ -0,0 +1,8 @@
++// Stub header for legacy expo-av compatibility
++#import <Foundation/Foundation.h>
++
++@protocol EXEventEmitterService <NSObject>
++
++- (void)sendEventWithName:(NSString *)name body:(id)body;
++
++@end
+diff --git a/node_modules/expo-modules-core/ios/Legacy/Protocols/EXLegacyExpoViewProtocol.h b/node_modules/expo-modules-core/ios/Legacy/Protocols/EXLegacyExpoViewProtocol.h
+new file mode 100644
+index 0000000..f7bb1c0
+--- /dev/null
++++ b/node_modules/expo-modules-core/ios/Legacy/Protocols/EXLegacyExpoViewProtocol.h
+@@ -0,0 +1,9 @@
++// Stub header for legacy expo-av compatibility
++#import <UIKit/UIKit.h>
++
++@protocol EXLegacyExpoViewProtocol <NSObject>
++
++@optional
++- (UIView *)getExpoView;
++
++@end

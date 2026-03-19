@@ -90,17 +90,22 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   setVolume: (volume: number) => {
     const clamped = Math.min(1, Math.max(0, volume));
     set({ volume: clamped, isMuted: clamped === 0 });
-    audioService.setVolume(clamped);
+    audioService.setVolume(clamped).catch((error) => {
+      console.error('[Store] Failed to sync volume to audio service:', error);
+    });
     AsyncStorage.setItem(VOLUME_STORAGE_KEY, String(clamped)).catch(() => {});
   },
 
   toggleMute: () => {
     const { isMuted, volume, previousVolume } = get();
     if (isMuted) {
-      set({ isMuted: false, volume: previousVolume });
-      audioService.setVolume(previousVolume);
+      // Restore previous volume, but ensure it's audible
+      const restoreVolume = previousVolume > 0 ? previousVolume : 0.8;
+      set({ isMuted: false, volume: restoreVolume });
+      audioService.setVolume(restoreVolume);
     } else {
-      set({ isMuted: true, previousVolume: volume, volume: 0 });
+      // Only save previousVolume if it's > 0 (don't save zero as "previous")
+      set({ isMuted: true, previousVolume: volume > 0 ? volume : previousVolume, volume: 0 });
       audioService.setVolume(0);
     }
   },

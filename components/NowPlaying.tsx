@@ -1,4 +1,5 @@
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { useState, useCallback } from 'react';
+import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing, sizes, glass } from '@/constants/theme';
 
@@ -9,15 +10,38 @@ interface NowPlayingProps {
 }
 
 export default function NowPlaying({ artworkUrl, title, artist }: NowPlayingProps) {
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  const handleLoadEnd = useCallback(() => setImageLoading(false), []);
+  const handleError = useCallback(() => {
+    setImageLoading(false);
+    setImageError(true);
+  }, []);
+
+  const showPlaceholder = !artworkUrl || imageError;
+
   return (
     <View style={styles.container}>
       <View style={styles.artworkContainer}>
-        {artworkUrl ? (
-          <Image source={{ uri: artworkUrl }} style={styles.artwork} />
-        ) : (
+        {showPlaceholder ? (
           <View style={styles.artworkPlaceholder}>
             <Ionicons name="musical-notes" size={64} color={colors.textTertiary} />
           </View>
+        ) : (
+          <>
+            {imageLoading && (
+              <View style={[styles.artworkPlaceholder, StyleSheet.absoluteFill]}>
+                <ActivityIndicator size="large" color={colors.textTertiary} />
+              </View>
+            )}
+            <Image
+              source={{ uri: artworkUrl }}
+              style={styles.artwork}
+              onLoadEnd={handleLoadEnd}
+              onError={handleError}
+            />
+          </>
         )}
       </View>
       <Text style={styles.title} numberOfLines={2}>

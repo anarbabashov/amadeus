@@ -44,5 +44,13 @@ coverage/
 *.p12
 google-service-account.json
 
+# Documentation & markdown (except README)
+*.md
+!README.md
+docs/
+
+# Ruby version (rbenv local)
+.ruby-version
+
 # Claude Code
 .claude/

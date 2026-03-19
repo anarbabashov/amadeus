@@ -99,6 +99,19 @@ describe('playerStore', () => {
       expect(usePlayerStore.getState().isMuted).toBe(false);
       expect(usePlayerStore.getState().volume).toBe(0.7);
     });
+
+    it('restores default volume when previousVolume is 0', () => {
+      usePlayerStore.setState({ volume: 0, isMuted: true, previousVolume: 0 });
+      usePlayerStore.getState().toggleMute();
+      expect(usePlayerStore.getState().isMuted).toBe(false);
+      expect(usePlayerStore.getState().volume).toBe(0.8);
+    });
+
+    it('does not save zero as previousVolume when muting at zero', () => {
+      usePlayerStore.setState({ volume: 0, isMuted: false, previousVolume: 0.5 });
+      usePlayerStore.getState().toggleMute();
+      expect(usePlayerStore.getState().previousVolume).toBe(0.5);
+    });
   });
 
   // State setters
