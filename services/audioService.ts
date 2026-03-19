@@ -1,5 +1,4 @@
 import { Audio, AVPlaybackStatus, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
-import { usePlayerStore } from '@/store/playerStore';
 import { CONFIG } from '@/constants/config';
 
 let soundInstance: Audio.Sound | null = null;
@@ -7,7 +6,9 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let bufferingStartTime: number | null = null;
 let destroyed = false;
 
+// Lazy import to break the require cycle (playerStore → audioService → playerStore)
 function getStore() {
+  const { usePlayerStore } = require('@/store/playerStore');
   return usePlayerStore.getState();
 }
 
@@ -17,7 +18,8 @@ async function configureAudioMode(): Promise<void> {
   await Audio.setAudioModeAsync({
     staysActiveInBackground: true,
     playsInSilentModeIOS: true,
-    shouldDuckAndroid: true,
+    allowsRecordingIOS: false, // Ensures speaker routing, not earpiece
+    shouldDuckAndroid: false, // Don't reduce volume when other apps make sounds
     playThroughEarpieceAndroid: false,
     interruptionModeIOS: InterruptionModeIOS.DoNotMix,
     interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
@@ -69,31 +71,9 @@ function scheduleReconnect(): void {
 }
 
 // ── Buffering Timeout Logic ───────────────────────────────────────────
-
-function handleBufferingState(isBuffering: boolean): void {
-  if (destroyed) return;
-
-  const store = getStore();
-
-  if (isBuffering) {
-    if (bufferingStartTime === null) {
-      bufferingStartTime = Date.now();
-    }
-    store.setIsBuffering(true);
-    store.setStreamStatus('buffering');
-
-    const elapsed = Date.now() - bufferingStartTime;
-    if (elapsed > CONFIG.BUFFER_TIMEOUT_MS) {
-      console.warn('[Audio] Buffer timeout exceeded. Reinitializing.');
-      bufferingStartTime = null;
-      store.setError('Buffer timeout');
-      scheduleReconnect();
-    }
-  } else {
-    bufferingStartTime = null;
-    store.setIsBuffering(false);
-  }
-}
+// Buffering is handled inline in onPlaybackStatusUpdate.
+// For HLS streams, isBuffering fires on every segment boundary — we only
+// use it for timeout detection, never to change the UI state.
 
 // ── Playback Status Callback ──────────────────────────────────────────
 
@@ -112,11 +92,24 @@ function onPlaybackStatusUpdate(status: AVPlaybackStatus): void {
     return;
   }
 
+  // Track buffering internally for timeout detection only.
+  // Don't return early — HLS streams can have isBuffering=true AND isPlaying=true
+  // simultaneously, and we need to process isPlaying to transition to 'live'.
   if (status.isBuffering) {
-    handleBufferingState(true);
-    return;
+    if (bufferingStartTime === null) {
+      bufferingStartTime = Date.now();
+    }
+    const elapsed = Date.now() - bufferingStartTime;
+    if (elapsed > CONFIG.BUFFER_TIMEOUT_MS) {
+      console.warn('[Audio] Buffer timeout exceeded. Reinitializing.');
+      bufferingStartTime = null;
+      store.setError('Buffer timeout');
+      scheduleReconnect();
+      return;
+    }
   } else {
-    handleBufferingState(false);
+    bufferingStartTime = null;
+    store.setIsBuffering(false);
   }
 
   if (status.isPlaying) {
@@ -125,11 +118,10 @@ function onPlaybackStatusUpdate(status: AVPlaybackStatus): void {
     if (store.errorCount > 0) {
       store.resetErrorCount();
     }
-  } else {
-    if (store.streamStatus !== 'connecting' && store.streamStatus !== 'error' && store.streamStatus !== 'offline') {
-      store.setIsPlaying(false);
-    }
   }
+  // Don't set streamStatus back to 'idle' from callbacks — stream status
+  // reflects the stream's state (live/error/offline), not play/pause.
+  // isPlaying handles the user's play/pause state separately.
 }
 
 // ── Core Audio Functions ──────────────────────────────────────────────
@@ -145,27 +137,34 @@ async function play(): Promise<void> {
   const store = getStore();
 
   try {
-    if (soundInstance === null) {
-      store.setStreamStatus('connecting');
-
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: CONFIG.STREAM_URL },
-        { shouldPlay: true, volume: store.isMuted ? 0 : store.volume },
-        onPlaybackStatusUpdate
-      );
-
-      if (destroyed) {
-        // Destroyed while we were awaiting — clean up immediately
-        try { await sound.unloadAsync(); } catch { /* ignore */ }
-        return;
-      }
-
-      soundInstance = sound;
-      return;
+    // Always create a fresh sound for HLS live streams — paused streams go
+    // stale and throw error 1937010544 ("stop") on resume.
+    if (soundInstance !== null) {
+      try { await soundInstance.unloadAsync(); } catch { /* ignore */ }
+      soundInstance = null;
     }
 
     store.setStreamStatus('connecting');
-    await soundInstance.playAsync();
+
+    // Re-apply audio mode before each play to ensure speaker routing
+    // (iOS can revert after interruptions)
+    await configureAudioMode();
+
+    const targetVolume = store.isMuted ? 0 : store.volume;
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: CONFIG.STREAM_URL },
+      { shouldPlay: true, volume: targetVolume },
+      onPlaybackStatusUpdate
+    );
+
+    if (destroyed) {
+      try { await sound.unloadAsync(); } catch { /* ignore */ }
+      return;
+    }
+
+    // Explicitly set volume after creation to ensure it takes effect
+    await sound.setVolumeAsync(targetVolume);
+    soundInstance = sound;
   } catch (error) {
     if (destroyed) return;
     console.error('[Audio] Play failed:', error);
@@ -187,11 +186,9 @@ async function pause(): Promise<void> {
       await soundInstance.pauseAsync();
     }
     store.setIsPlaying(false);
-    store.setStreamStatus('idle');
   } catch (error) {
     console.error('[Audio] Pause failed:', error);
     store.setIsPlaying(false);
-    store.setStreamStatus('idle');
   }
 }
 
@@ -225,9 +222,12 @@ async function reinitializeAudio(): Promise<void> {
   if (destroyed) return;
 
   try {
+    await configureAudioMode();
+
+    const targetVolume = store.isMuted ? 0 : store.volume;
     const { sound } = await Audio.Sound.createAsync(
       { uri: CONFIG.STREAM_URL },
-      { shouldPlay: true, volume: store.isMuted ? 0 : store.volume },
+      { shouldPlay: true, volume: targetVolume },
       onPlaybackStatusUpdate
     );
 
@@ -236,6 +236,7 @@ async function reinitializeAudio(): Promise<void> {
       return;
     }
 
+    await sound.setVolumeAsync(targetVolume);
     soundInstance = sound;
     clearReconnectTimer();
   } catch (error) {
